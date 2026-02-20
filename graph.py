@@ -1,68 +1,44 @@
-class Graph:
-    def __init__(self):
-        self.edges = []
-        self.vertices = set()
+import time
+import matplotlib.pyplot as plt
+import random
 
-    def add_edge(self, u, v, w):
-        self.edges.append((w, u, v))
-        self.vertices.add(u)
-        self.vertices.add(v)
+def max_heapify(arr,n,i):
+    largest = i
+    left = 2* i + 1
+    right = 2 * i + 2
+    if left < n and arr[left] > arr[largest] :
+        largest = left
+    if right < n and arr[right] > arr[largest] :
+        largest = right
 
-    def find(self, parent, i):
-        if parent[i] == i:
-            return i
-        return self.find(parent, parent[i])
+    if largest != i:
+        arr[i],arr[largest] = arr[largest],arr[i]
+        max_heapify(arr,n,largest)
 
-    def union(self, parent, rank, x, y):
-        if rank[x] < rank[y]:
-            parent[x] = y
-        elif rank[x] > rank[y]:
-            parent[y] = x
-        else:
-            parent[y] = x
-            rank[x] += 1
+def build_max_heap(arr):
+    n = len(arr)
+    for i in range(n//2-1,-1,-1):
+        max_heapify(arr,n,i)
 
-    def kruskal_mst(self):
-        
-        self.edges.sort()
+def heapsort(arr):
+    n = len(arr)
+    build_max_heap(arr)
 
-        parent = {}
-        rank = {}
+    for i in range(n-1,0,-1):
+        arr[i],arr[0] = arr[0],arr[i]
+        max_heapify(arr,i,0)
+    return arr
 
-        
-        for v in self.vertices:
-            parent[v] = v
-            rank[v] = 0
-
-        mst = []
-        total_cost = 0
-
-        for w, u, v in self.edges:
-            x = self.find(parent, u)
-            y = self.find(parent, v)
-
-            if x != y:
-                mst.append((u, v, w))
-                total_cost += w
-                self.union(parent, rank, x, y)
-
-        print("\nEdges in Minimum Cost Spanning Tree:")
-        for u, v, w in mst:
-            print(f"{u} - {v} = {w}")
-        print("Total cost:", total_cost)
-
-
-
-g = Graph()
-
-e = int(input("Enter number of edges: "))
-print("Enter edges in format: ab 3")
-
-for _ in range(e):
-    edge, weight = input().split()
-    u = edge[0]
-    v = edge[1]
-    w = int(weight)
-    g.add_edge(u, v, w)
-
-g.kruskal_mst()
+if __name__ == "__main__":
+    sizes = [5000, 6000, 7000, 8000, 9000, 10000]
+    times = []
+    for s in sizes:
+        arr = [random.randint(1, 10000) for _ in range(s)]
+        start = time.time()
+        heapsort(arr)
+        end = time.time()
+        times.append(end - start)
+    print(sizes)
+    print(times)
+    plt.plot(sizes, times)
+    plt.show()
